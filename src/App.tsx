@@ -1,24 +1,12 @@
 import React from 'react';
-import logo from './logo.svg';
+import Todos from './Todos';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className='md:w-1/2 bg-gray-300 rounded text-center m-auto pt-4 pb-4 px-2 font-semibold'>Demo AXIOS as the API Client Library for the IQ UI Project</div>
+      <Todos />
     </div>
   );
 }
