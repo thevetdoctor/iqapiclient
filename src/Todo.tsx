@@ -6,6 +6,7 @@ import {FaMale, FaFemale} from 'react-icons/fa';
 import {Rings} from "react-loader-spinner";
 import axios from 'axios';
 import {apiUrl} from './helper';
+import alive from './5alive.jpg';
 
 type TODO = {
     id: number,
@@ -13,7 +14,7 @@ type TODO = {
     cover: string,
     sex: string
 }
-export default function Todo({todo}: {todo: TODO }) {
+export default function Todo({todo, deleteById}: {todo: TODO, deleteById: (id:number) => void }) {
     const [editStatus, setEditStatus] = useState(false);
     const [loading, setLoading] = useState(false);
     
@@ -29,7 +30,7 @@ export default function Todo({todo}: {todo: TODO }) {
                     'Content-Type': 'application/json',
                 }
             });
-            console.log(data);
+            console.log(data, "updating", id);
             setLoading(false);
             setEditStatus(false);
         } catch (error){ 
@@ -52,7 +53,8 @@ export default function Todo({todo}: {todo: TODO }) {
                     'Content-Type': 'application/json',
                 }
             });
-            console.log(data);
+            console.log(data, "deleting", id);
+            deleteById(id);
         } catch (error){ 
                 if (axios.isAxiosError(error)) {
                     console.log('error message: ', error.message);
@@ -74,7 +76,7 @@ export default function Todo({todo}: {todo: TODO }) {
                 <span className='text-center font-semibold p-2 border border-2 rounded-full bg-gray-200'><FaMale size={25}/></span>
                 :
                 <span className='text-center font-semibold p-2 border border-2 rounded-full bg-gray-200'><FaFemale size={25}/></span>}
-                {/* <span className='text-center font-semibold px-3'><img src={`${todo.cover}`} alt="profile" width="1em" height="1em" /></span> */}
+                <span className='text-center font-semibold px-3'><img src={alive} alt="profile" width="1em" height="1em" /></span>
                 <span className='text-center font-semibold px-3'>{todo.title}</span>
                 <span className='flex'>
                     <span onClick={() => setEditStatus(!editStatus)} className='p-2 mr-0 rounded mx-2 text-blue-600 cursor-pointer'><MdEdit size={25}/></span>

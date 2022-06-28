@@ -1,0 +1,901 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/thevetdoctor/farmBarter/1.0.0
+info:
+  description: farmBarter API for local farmer transactions
+  version: "1.0.0"
+  title: farmBarter API
+  contact:
+    email: thevetdoctor@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: adminUser
+    description:  adminUser-only access
+  - name: users
+    description: access to all registered users
+  - name: general
+    description: access to all (unregistered & registered)
+paths:
+  /users:
+    get:
+      tags:
+        - adminUser
+      summary: retrieves users from DB
+      operationId: getUsers
+      description: By passing in the appropriate options, you can search for
+        registered users in the system
+      parameters:
+        - in: header
+          name: auth token
+          description: admin access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of registered users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Access forbidden
+        '404':
+          description: Not found
+        '503':
+          description: Service unavailable
+    post:
+      tags:
+        - general
+      summary: creates a new user
+      operationId: createUser
+      description: Adds a new user to the DB
+      responses:
+        '201':
+          description: new user created
+        '400':
+          description: Bad request
+        '404':
+          description: Not found        
+        '409':
+          description: user already exists
+        '503':
+          description: Service unavailable       
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: to create new user
+    
+  /users/:userId:
+    get:
+      tags:
+        - adminUser
+      summary: retrieves specific user by ID
+      operationId: getUser
+      description: get specific user by user ID
+      parameters:
+        - in: header
+          name: auth token
+          description: admin access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: single registered user
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable      
+    patch:
+      tags:
+        - adminUser
+      summary: updates status of a specific user
+      operationId: updateUser
+      description: Updates status of a specific user
+      responses:
+        '201':
+          description: user status updated
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: user not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: to update the status of a specific user
+    delete:
+      tags:
+        - adminUser
+      summary: delete record of a specific user
+      operationId: deleteUser
+      description: Delete record of a specific user
+      responses:
+        '201':
+          description: user record deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: user not found
+        '503':
+          description: Service unavailable    
+  /products:
+    get:
+      tags: 
+        - users
+      summary: retrieves products from DB
+      operationId: getProducts
+      description: Get a list of all products in DB
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of all products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    post:
+      tags:
+        - users
+      summary: creates a new product
+      operationId: createProduct
+      description: Adds a new product to the DB
+      responses:
+        '201':
+          description: new product created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: product already exists
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+        description: to create new product 
+        
+  /products/:productId:
+    get:
+      tags: 
+        - users
+      summary: retrieves a specific product from DB
+      operationId: getProduct
+      description: Retrieves a specific product
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: specific product retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    patch:
+      tags:
+        - users
+      summary: updates status of a specific product
+      operationId: updateProduct
+      description: Updates status of a specific product
+      responses:
+        '201':
+          description: product status updated
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: product not found
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+        description: to update status of a specific product
+    delete:
+      tags:
+        - users
+      summary: deletes a specific product
+      operationId: deleteProduct
+      description: Deletes record of a specific product
+      responses:
+        '204':
+          description: product record deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: product not found
+        '503':
+          description: Service unavailable  
+        
+  /orders:
+    get:
+      tags: 
+        - users
+      summary: retrieves orders from DB
+      operationId: getOrders
+      description: Get a list of all orders in DB
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of all orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    post:
+      tags:
+        - users
+      summary: creates a new order
+      operationId: createOrder
+      description: Creates a new order from a set of products in the DB
+      responses:
+        '201':
+          description: new order created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: order already created
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+        description: to create new order
+        
+  /orders/:orderId:
+    get:
+      tags: 
+        - users
+      summary: retrieves a specific order from DB
+      operationId: getOrder
+      description: Get a specific order from DB
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: order retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    patch:
+      tags:
+        - users
+      summary: updates status of a specific order
+      operationId: updateOrder
+      description: Creates status of a specific order
+      responses:
+        '205':
+          description: order status updated
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: order cannot be updated
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+        description: to update orderstatus
+    delete:
+      tags:
+        - users
+      summary: deletes a specific order
+      operationId: deleteOrder
+      description: Delete a specific order
+      responses:
+        '204':
+          description: order deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: order not found
+        '503':
+          description: Service unavailable  
+
+  /reviews:
+    get:
+      tags: 
+        - adminUser
+      summary: retrieves all reviews from DB
+      operationId: getAllReviews
+      description: Get a list of all reviews in DB
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of all reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    delete:
+      tags:
+        - adminUser
+      summary: deletes all reviews
+      operationId: deleteAllReviews
+      description: Delete all reviews in DB
+      responses:
+        '204':
+          description: all reviews deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: reviews cannot be deleted
+        '503':
+          description: Service unavailable  
+        
+  /reviews/:productId:
+    get:
+      tags: 
+        - users
+      summary: retrieves all reviews for a specific product
+      operationId: getReviewsByProductId
+      description: Get reviews for a specific product from DB
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: reviews retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    post:
+      tags:
+        - users
+      summary: creates a new review on a specific product
+      operationId: createReview
+      description: Creates a new review on a specific product
+      responses:
+        '201':
+          description: new review created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: review already created
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        description: to create new review
+    delete:
+      tags:
+        - adminUser
+      summary: deletes all reviews of a specific product
+      operationId: deleteAllReviewsByProductId
+      description: Delete all reviews of a specific product in DB
+      responses:
+        '204':
+          description: all reviews of product deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: reviews cannot be deleted
+        '503':
+          description: Service unavailable  
+          
+  /reviews/:productId/:reviewId:
+    get:
+      tags: 
+        - users
+      summary: retrieves a specific review for a specific product
+      operationId: getReview
+      description: Get a specific review for a specific product from DB
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: review retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                example: '#/components/schemas/Review'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    patch:
+      tags:
+        - users
+      summary: updates a specific review
+      operationId: updateReview
+      description: Updates a specific review
+      responses:
+        '205':
+          description: review status updated
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: review cannot be updated
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        description: to update review status
+    delete:
+      tags:
+        - users
+      summary: deletes a specific review
+      operationId: deleteReview
+      description: Delete a specific review
+      responses:
+        '204':
+          description: review deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: review not found
+        '503':
+          description: Service unavailable  
+         
+  /comments/:reviewId:
+    get:
+      tags: 
+        - users
+      summary: retrieves all comments for a specific review
+      operationId: getCommentsByReviewId
+      description: Get comments for a specific review
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: comments retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '403':
+          description: Access forbidden
+        '503':
+          description: Service unavailable  
+    post:
+      tags:
+        - users
+      summary: creates a new comment on a specific review
+      operationId: createComment
+      description: Creates a new comment on a specific review
+      responses:
+        '201':
+          description: new comment created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: comment already created
+        '503':
+          description: Service unavailable  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        description: to create new comment
+    delete:
+      tags:
+        - adminUser
+      summary: deletes all comments on a specific review
+      operationId: deleteAllCommentsByReviewId
+      description: Delete all comments on a specific review
+      responses:
+        '204':
+          description: all comments on review deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: comments cannot be deleted
+        '503':
+          description: Service unavailable  
+          
+  /comments/:reviewId/:commentId:
+    get:
+      tags: 
+        - users
+      summary: retrieves a specific comment for a specific review
+      operationId: getCommentByReviewId
+      description: Get a specific comment for a specific review
+      parameters:
+        - in: header
+          name: auth token
+          description: user access token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: comment retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                example: '#/components/schemas/Comment'
+        '403':
+          description: Access forbidden 
+        '503':
+          description: Service unavailable  
+    patch:
+      tags:
+        - users
+      summary: updates a specific comment
+      operationId: updateComment
+      description: Updates a specific comment
+      responses:
+        '204':
+          description: comment status updated
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: comment cannot be updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        description: to update comment status
+    delete:
+      tags:
+        - users
+      summary: deletes a specific comment
+      operationId: deleteComment
+      description: Delete a specific comment
+      responses:
+        '205':
+          description: comment deleted
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: comment not found
+        '503':
+          description: Service unavailable  
+  
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - userId
+        - firstName
+        - lastName
+        - email
+        - mobile
+        - password
+        - location
+        - status
+        - verified
+        - productType
+        - dateCreated
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        firstName:
+          type: string
+          example: Obafemi
+        lastName:
+          type: string
+          example: Awolowo
+        email:
+          type: string
+          example: oawolowo@presidency.org.ng
+        mobile:
+          type: string
+          example: 2348012345678
+        password:
+          type: string
+          format: password
+          example: hidden
+        userName:
+          type: string
+          example: awo
+        location:
+          type: string
+          example: Ibadan
+        status:
+          type: string
+          example: farmer
+        verified:
+          type: boolean
+          example: true
+        productType:
+          type: string
+          example: livestock
+        dateCreated:
+          type: string
+          format: date
+          example: 2021-01-24
+        dateUpdated:
+          type: string
+          format: date
+          example: 2021-01-24      
+      description: User Schema
+ 
+    Comment:
+      type: object
+      required:
+        - commentId
+        - reviewId
+        - userId
+        - productId
+        - content
+        - dateCreated
+      properties:
+        commentId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        reviewId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851     
+        userId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        productId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        content:
+            type: string
+            example: Thanks for your review. We promise to keep it up.
+        dateCreated:
+            type: string
+            format: date
+            example: 2021-01-24
+      description: Comment Schema  
+  
+    Product:
+      type: object
+      required:
+        - productId
+        - userId
+        - category
+        - title
+        - quantity
+        - marketValue
+        - barterPrice
+        - imageUrls
+        - rating
+        - dateCreated
+        - dateUpdated
+      properties:
+        productId:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        userId:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        category:
+          type: string
+          example: livestock, crops
+        title:
+          type: string
+          example: Cassava
+        quantity:
+          type: number
+          example: 35.50kg
+        marketValue:
+          type: number
+          example: NGN 450:00
+        barterValue:
+          type: number
+          example: 3.6
+        imageUrls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageUrl'
+        rating:
+          type: number
+          example: 4
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        dateCreated:
+          type: string
+          format: date
+          example: 2021-01-24
+        dateUpdated:
+          type: string
+          format: date
+          example: 2021-01-24      
+      description: Product Schema
+
+    Order:
+        type: object
+        required:
+        - orderId
+        - userId
+        - products
+        - totalValue
+        - status
+        - dateCreated
+        - dateCanceled
+        - dateBartered
+        properties:
+          orderId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+          userId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+          products:
+            type: array
+            items:
+              $ref: '#/components/schemas/Product'
+          totalValue:
+            type: string
+            example: 17.4 (barterEquivalent)
+          status:
+            type: string
+            example: pending, paid, cancelled
+          dateCreated:
+            type: string
+            format: date
+            example: 2021-01-24
+          dateCanceled:
+            type: string
+            format: date
+            example: 2021-01-24
+          dateBartered:
+            type: string
+            format: date
+            example: 2021-01-24
+        description: Order Schema
+  
+    Review:
+      type: object
+      required: 
+        - reviewId
+        - userId
+        - productId
+        - content
+        - dateCreated
+      properties:
+        reviewId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        userId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        productId:
+            type: string
+            format: uuid
+            example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        content:
+            type: string
+            example: Thanks. I loved my purchase on farmbarter. Will definitely recommend the app.
+        comments:
+            type: array
+            items:
+              $ref: '#/components/schemas/Comment'
+        dateCreated:
+            type: string
+            format: date
+            example: 2021-01-24
+      description: Review Schema
+  
+    ImageUrl:
+      type: string
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          example: 'https://res.cloudinary.com/picture1.jpg'
+      description: Image Url Schema

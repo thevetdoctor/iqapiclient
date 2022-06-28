@@ -1,0 +1,1219 @@
+openapi: '3.0.0'
+info:
+  title: Symphony Interview Questions
+  version: '1.0'
+
+servers:
+  - url: http://127.0.0.1:8080/
+    description: relative path example
+
+paths:
+
+# ------------------------------
+#  Users
+# ------------------------------
+
+  /iq/users/v1/{user_email}:
+    delete:
+      summary: Deletes a user's account
+      tags:
+        - Users
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+        
+            not-found, 404
+            email-invalid, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: users.v1.endpoints.delete_account
+      parameters:
+        - in: path
+          name: user_email
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns status ‘ok’
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityIdResponse'
+      security:
+        - jwt: [ ]
+
+  /iq/users/v1/password/{user_email}:
+    get:
+      summary: Forgotten Password
+      tags:
+        - Users
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 404
+
+      operationId: users.v1.endpoints.forgotten_password
+      parameters:
+        - in: path
+          name: user_email
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns status ‘ok’
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /iq/users/v1/password/{token}:
+    put:
+      summary: Change Password
+      tags:
+        - Users
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 404
+            token-invalid, 401
+            authorization-required, 401
+            password-invalid, 400
+
+      operationId: users.v1.endpoints.change_password
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Change Password Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Password'
+      responses:
+        '200':
+          description: Returns status ‘ok’
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /iq/users/v1/signup:
+    post:
+      summary: Signup up a new user
+      tags:
+        - Users
+      description: >
+
+        Errors:
+
+            password-invalid, 400
+            email-invalid, 406
+            user-already-exists, 400
+            verification-email-not-sent 500
+
+      operationId: users.v1.endpoints.signup
+      requestBody:
+        description: Signup Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignup'
+
+      responses:
+        '201':
+          description: Returns a success Response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /iq/users/v1/login:
+    post:
+      summary: Login with user's credentials
+      tags:
+        - Users
+      description: >
+
+        Errors:
+
+            not-found, 404
+            user-already-logged-in, 400
+            password-invalid, 400
+            email-invalid, 400
+            email-unverified, 400
+
+      operationId: users.v1.endpoints.login
+      requestBody:
+        description: Login Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+
+      responses:
+        '200':
+          description: Returns a JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginResponse'
+
+  /iq/users/v1/logout:
+    post:
+      summary: Logout
+      tags:
+        - Users
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+
+            not-found, 404
+            user-already-logged-in, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: users.v1.endpoints.logout
+      responses:
+        '200':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+      security:
+        - jwt: [ ]
+
+  /iq/users/v1/email_verification:
+    get:
+      summary: Verifies user's email
+      tags:
+        - Users
+      description: >
+
+        Endpoint called from a link in the email sent to a user for email verification.
+
+        Errors:
+
+            not-found, 404
+            authorisation-required, 401
+
+      operationId: users.v1.endpoints.email_verification
+      parameters:
+        - name: email_verification_token
+          description: Email verification token generated at sign-up time
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns OK
+      security:
+        - jwt: [ ]
+
+  /iq/users/v1/generate_tokens:
+    get:
+      summary: Generates new user access and refresh tokens
+      tags:
+        - Users
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+            Bearer Valid Basic Refresh token
+
+        Errors:
+
+          'token-invalid', 401
+          'authorisation-required', 401
+          'user-not-found', 404
+
+      operationId: users.v1.endpoints.generate_new_tokens
+      parameters:
+        - name: old_access_token
+          description: The old access token of the user
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns a new access token (token) and a new refresh token (refresh_token)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/UserTokens'
+                  - $ref: '#/components/schemas/UserID'
+
+      security:
+        - jwt_refresh: [ ]
+
+# ------------------------------
+#  Categories
+# ------------------------------
+
+  /iq/categories/v1/:
+    get:
+      summary: List categories
+      tags:
+        - Categories
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: categories.v1.endpoints.list_categories
+      responses:
+        '200':
+          description: Returns list of categories or an error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categories'
+      security:
+        - jwt: [ ]
+    post:
+      summary: Add a new question category and optional list of subcategories
+      tags:
+        - Categories
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+
+            token-invalid, 401
+            authorization-required, 401
+            category-already-exists, 400
+
+      operationId: categories.v1.endpoints.add_category
+      requestBody:
+        description: Add Category Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCategory'
+      responses:
+        '201':
+          description: Returns category and the subcategories or error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddCategory'
+
+      security:
+        - jwt: [ ]
+    put:
+      summary: Update a question category’s name
+      tags:
+        - Categories
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+
+            token-invalid, 401
+            authorization-required, 401
+            category-already-exists, 400
+
+      operationId: categories.v1.endpoints.update_category
+      requestBody:
+        description: Update Category Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategory'
+      responses:
+        '201':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddCategory'
+
+      security:
+        - jwt: [ ]
+
+  /iq/categories/v1/{category_name}:
+    delete:
+      summary: Delete a question category
+      tags:
+        - Categories
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: categories.v1.endpoints.delete_category
+      parameters:
+        - in: path
+          name: category_name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: keep_questions
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+      security:
+        - jwt: [ ]
+
+# ------------------------------
+#  Subcategories
+# ------------------------------
+
+  /iq/categories/v1/subcategories:
+    post:
+      summary: Add new subcategories to a category
+      tags:
+        - Subcategories
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401    
+
+      operationId: categories.v1.endpoints.add_subcategories
+      requestBody:
+        description: Add Category Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCategory'
+      responses:
+        '201':
+          description: Returns category and the subcategories or an error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddCategory'
+
+      security:
+        - jwt: [ ]
+    put:
+      summary: Edit subcategory of a category
+      tags:
+        - Subcategories
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: categories.v1.endpoints.update_subcategory
+      requestBody:
+        description: Update Subcategory Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubCategory'
+      responses:
+        '200':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddCategory'
+
+      security:
+        - jwt: [ ]
+
+  /iq/categories/v1/{category_name}/{subcategory_name}:
+    delete:
+      summary: Delete a question subcategory
+      tags:
+        - Categories
+      description: >
+
+        Required Headers:
+
+          Authorization request header
+
+            Bearer Valid Token
+
+        Errors:
+
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: categories.v1.endpoints.delete_subcategory
+      parameters:
+        - in: path
+          name: category_name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: subcategory_name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: keep_questions
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+      security:
+        - jwt: [ ]
+
+# ------------------------------
+#  Questions
+# ------------------------------
+
+  /iq/questions/v1/:
+    get:
+      summary: Lists questions
+      tags:
+        - Questions
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: questions.v1.endpoints.list_questions
+      responses:
+        '200':
+          description: Returns list of questions or an error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Questions'
+      security:
+        - jwt: [ ]
+
+    post:
+      summary: Add a question to a category/subcategory
+      tags:
+        - Questions
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: questions.v1.endpoints.add_question
+      requestBody:
+        description: Add Question Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddQuestion'
+      responses:
+        '201':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddQuestion'
+
+      security:
+        - jwt: [ ]
+
+    put:
+      summary: Update a question
+      tags:
+        - Questions
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: questions.v1.endpoints.update_question
+      requestBody:
+        description: Update Question Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuestion'
+      responses:
+        '200':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateQuestion'
+
+      security:
+        - jwt: [ ]
+
+# ------------------------------
+#  Jobs
+# ------------------------------
+
+  /iq/jobs/v1/:
+
+    get:
+      summary: Returns a list of all jobs
+      tags:
+        - Jobs
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: jobs.v1.endpoints.get_jobs
+      responses:
+        '200':
+          description: A list of jobs or an error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+
+      security:
+        - jwt: [ ]
+
+    post:
+      summary: Creates a job
+      tags:
+        - Jobs
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: jobs.v1.endpoints.create
+      requestBody:
+        description: Job Data Object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        '201':
+          description: Returns 'ok' or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityIdResponse'
+
+#      security:
+#        - jwt: [ ]
+
+  /iq/jobs/v1/{job_id}:
+
+    get:
+      summary: Get Job
+      tags:
+        - Jobs
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+      operationId: jobs.v1.endpoints.get_job
+      parameters:
+          - in: path
+            name: job_id
+            required: true
+            schema:
+              type: string
+      responses:
+        '200':
+          description: A Job Object or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+
+    put:
+      summary: Update job
+      tags:
+        - Jobs
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 400
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: jobs.v1.endpoints.update
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        description: Update Job Data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJob'
+
+      responses:
+        '200':
+          description: Returns a Job Object or an Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+
+#      security:
+#        - jwt: [ ]
+
+    delete:
+      summary: Delete job
+      tags:
+        - Jobs
+      description: >
+        
+        Required Headers:
+        
+          Authorization request header
+        
+            Bearer Valid Token
+        
+        Errors:
+        
+            not-found, 404
+            token-invalid, 401
+            authorization-required, 401
+
+      operationId: jobs.v1.endpoints.delete
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the id of the job deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityIdResponse'
+      security:
+        - jwt: [ ]
+
+# ------------------------------
+#  Components
+# ------------------------------
+
+components:
+
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: auth.v1.endpoints.decode_token
+
+    jwt_refresh:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: auth.v1.endpoints.decode_refresh_token
+
+  # Common Parameters
+  parameters:
+    SortOrder:
+      in: query
+      name: sort_order
+      description: Property to sort by
+      schema:
+        type: string
+        enum: [ 'asc', 'desc' ]
+        default: 'asc'
+
+    MaxItems:
+      in: query
+      name: max_items
+      description: Total number of results to return across all batches - Minium = 5
+      schema:
+        type: integer
+        minimum: 5
+        default: 10
+
+    BatchSize:
+      in: query
+      name: batch_size
+      description: Maximum number of results in each asynchronous call - Minium = 10
+      schema:
+        type: integer
+        minimum: 10
+        default: 10
+
+    Filters:
+      in: query
+      name: filters
+      description: Property to filter by
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/FilterSpec'
+
+  schemas:
+    FilterOps:
+      type: string
+      description: filter comparison operators
+      enum:
+        - eq
+        - lte
+        - gte
+        - lt
+        - gt
+        - in
+
+    FilterSpec:
+      type: object
+      properties:
+        filter:
+          type: string
+          description: the type of filter
+        value:
+          type: string
+          description: the value to match
+        op:
+          type: string
+          description: filter comparison operators
+          enum:
+            - eq
+            - lte
+            - gte
+            - lt
+            - gt
+            - in
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusOk'
+
+    StatusOk:
+      type: string
+      description: Api call success
+      default: ok
+
+    EntityResponse:
+      type: object
+      description: Payload returning an entity
+      properties:
+        entity:
+          type: object
+          description: Object's entity
+
+    EntitiesResponse:
+      description: Payload returning a list of entities
+      type: array
+      items:
+        $ref: '#/components/schemas/EntityResponse'
+
+    EntityIdResponse:
+      properties:
+        id:
+          description: Object's ID
+          type: string
+          format: ObjectId
+
+    Email:
+      required:
+        - email
+      properties:
+        email:
+          description: Email Address
+          type: string
+          pattern: ([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+
+
+    Password:
+      required:
+        - password
+      properties:
+        password:
+          description: Password
+          type: string
+          pattern: (?=\S{8,32})(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[0-9])(?=\S*)(?<!\S)\S{8,32}(?=\s|\Z)
+
+    UserID:
+      required:
+        - user_id
+      properties:
+        user_id:
+          description: User ID
+          type: string
+          format: ObjectId
+
+
+    User:
+      allOf:
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/UserID'
+
+    UserTokens:
+      type: object
+      required:
+        - token
+        - refresh_token
+      properties:
+        token:
+          type: string
+          format: byte
+          description: User's api calls token
+        refresh_token:
+          type: string
+          format: byte
+          description: User's refresh token
+
+    UserSignup:
+      allOf:
+        - $ref: '#/components/schemas/AccessRole'
+        - $ref: '#/components/schemas/Credentials'
+
+    #  User update request data - Uses Base User Definition
+    UserUpdate:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - $ref: '#/components/schemas/AccessRole'
+
+    UserLoginResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UserTokens'
+        - $ref: '#/components/schemas/User'
+
+    AccessRole:
+      properties:
+        access_role:
+          description: Access role of user
+          type: string
+          enum:
+            - admin
+            - basic
+          default: basic
+
+    Credentials:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Password'
+        - $ref: '#/components/schemas/Email'
+
+    Subcategory:
+      description: Subcategory
+      type: string
+
+    Category:
+      required:
+        - name
+      properties:
+        name:
+          description: Category Name
+          type: string
+
+    Categories:
+      type: array
+      items:
+        $ref: '#/components/schemas/Category'
+
+    ListSubcategories:
+      type: array
+      items:
+        $ref: '#/components/schemas/Subcategory'
+
+    Subcategories:
+      properties:
+        subcategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subcategory'
+
+    AddCategory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Category'
+        - $ref: '#/components/schemas/Subcategories'
+
+    UpdateCategory:
+      type: object
+      required:
+        - old_category_name
+        - new_category_name
+      properties:
+        old_category_name:
+          description: Old Category Name
+          type: string
+        new_category_name:
+          description: New Category Name
+          type: string
+
+    UpdateSubCategory:
+      type: object
+      required:
+        - old_subcategory_name
+        - new_subcategory_name
+      properties:
+        old_category_name:
+          description: Old Subcategory Name
+          type: string
+        new_category_name:
+          description: New Subcategory Name
+          type: string
+      oneOf:
+        - $ref: '#/components/schemas/Category'
+
+    Question:
+      description: Question
+      type: string
+
+    AddQuestion:
+      type: object
+      required:
+        - question
+        - category
+      properties:
+        question:
+          $ref: '#/components/schemas/Question'
+        must:
+          type: boolean
+          description: Must be included in the question set or not
+      oneOf:
+        - $ref: '#/components/schemas/Category'
+        - $ref: '#/components/schemas/Subcategories'
+
+    UpdateQuestion:
+      type: object
+      required:
+        - question
+        - question_id
+      properties:
+        question:
+          $ref: '#/components/schemas/Question'
+        question_id:
+          type: string
+          format: ObjectId
+          description: Question ID
+        must:
+          type: boolean
+          description: Must be included in the question set or not
+
+    Questions:
+      description: Questions data type
+      type: array
+      items:
+        $ref: '#/components/schemas/UpdateQuestion'
+
+
+    # ------------------------------
+    #  Jobs
+    # ------------------------------
+
+    JobID:
+      properties:
+        job_id:
+          type: string
+          format: ObjectId
+          description: Job ID
+
+    JobKeywords:
+      description: Keywords used to generate questions for job
+      properties:
+        keywords:
+          type: array
+          items:
+            type: string
+
+    Job:
+      description: Job data type
+      required:
+        - title
+        - description
+        - requirements
+      properties:
+        title:
+          type: string
+          example: Senior Python Developer...
+        description:
+          type: string
+          example: Senior Python Developer with extensive API experience...
+        requirements:
+          type: string
+          example: Flask and or FastAPI are prerequisites for this position. A good knowledge of...
+
+    UpdateJob:
+      type: object
+      description: Job data type
+      anyOf:
+        - properties:
+            title:
+              type: string
+              example: Senior Python Developer...
+            description:
+              type: string
+              example: Senior Python Developer with extensive API experience...
+            requirements:
+              type: string
+              example: Flask and or FastAPI are prerequisites for this position. A good knowledge of...
+
+    JobResponse:
+      type: object
+      description: Job data type
+      allOf:
+        - $ref: '#/components/schemas/JobID'
+        - $ref: '#/components/schemas/Job'
+        - $ref: '#/components/schemas/JobKeywords'
+
+    Jobs:
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterSpec'

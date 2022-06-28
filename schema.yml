@@ -1,0 +1,1426 @@
+openapi: 3.0.0
+info:
+  title: Cenegenics API spec
+  description: Cenegenics open API specification
+  version: 1.0.0
+  license:
+    name: MIT
+    url: 'http://localhost'
+servers:
+  - url: /api/1.0
+    description: Development server
+  - url: 'http://localhost:5003'
+    description: Development server
+paths:
+  /health_check:
+    get:
+      summary: Health endpoint
+      operationId: health_check
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          description: Health endpoint
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  healthy:
+                    type: boolean
+                required:
+                  - healthy
+        '400':
+          description: Bad request
+  /debug-sentry:
+    get:
+      summary: Sentry endpoint
+      operationId: trigger_error
+      x-openapi-router-controller: app.api.views
+      responses:
+        '204':
+          description: Sentry endpoint
+        '400':
+          description: Bad request
+  /auth/register:
+    post:
+      summary: Register a new user
+      operationId: register
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      # parameters:
+      #   - $ref: '#/components/parameters/account'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '201':
+          $ref: '#/components/responses/RegisterResponse'
+        '400':
+          description: Bad request
+  /auth/login:
+    post:
+      summary: Login to the system
+      operationId: login
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginResponse'
+        '400':
+          description: Bad request
+  /auth/logout:
+    get:
+      summary: Logout from the system
+      operationId: logout
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          description: Successfully logged in
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /auth/check-account:
+    get:
+      summary: Check for existing account in system
+      operationId: check_account
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      parameters:
+        - $ref: '#/components/parameters/account'
+      responses:
+        '200':
+          description: User doesn't exists
+        '400':
+          description: Bad request
+        '409':
+          description: User already exists
+  /auth/forgot-password:
+    post:
+      summary: Forgot password
+      operationId: forgot_password
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Email'
+      responses:
+        '200':
+          $ref: '#/components/responses/ForgotPasswordResponse'
+        '400':
+          description: Bad request
+  /profile/upload:
+    post:
+      summary: Upload profile image
+      operationId: upload_image
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Profile image successfully uploaded
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /profile/avatar:
+    get:
+      summary: Get patient avatar image
+      operationId: get_avatar
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          description: Avatar in several image formats
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /profile/me:
+    get:
+      summary: Get user information
+      operationId: get_user
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /profile/remove-image:
+    delete:
+      summary: Remove profile image
+      operationId: remove_image
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '204':
+          description: Profile image successfully removed
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /profile/change-password:
+    post:
+      summary: Change user password
+      operationId: change_password
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+      responses:
+        '204':
+          description: User password successfully changed
+        '400':
+          description: Bad request
+  /profile/update-user:
+    patch:
+      summary: Update user's profile
+      operationId: update_user
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateUser'
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /biometrics:
+    get:
+      summary: Get biometric informations
+      operationId: get_biometrics
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /weight:
+    get:
+      summary: Get patiens weight data over time
+      operationId: get_weight
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /total-body-fat:
+    get:
+      summary: Get total body fat data
+      operationId: get_total_body_fat
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTotalBodyFatResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /muscle-mass:
+    get:
+      summary: Get muscle mass data
+      operationId: get_muscle_mass
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /fat-mass:
+    get:
+      summary: Get fat mass data
+      operationId: get_fat_mass
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /upper-torso-fat:
+    get:
+      summary: Get upper torso fat data
+      operationId: get_upper_torso_fat
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /vo2-max:
+    get:
+      summary: Get VO2 max data
+      operationId: get_vo2_max
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetVO2MaxResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /peak-heart-rate:
+    get:
+      summary: Get peak heart rate data
+      operationId: get_peak_heart_rate
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /anaerobic-threshold:
+    get:
+      summary: Get anaerobic threshold data
+      operationId: get_anaerobic_threshold
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /max-wattage:
+    get:
+      summary: Get max wattage data
+      operationId: get_max_wattage
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /resting-heart-rate:
+    get:
+      summary: Get resting heart rate data
+      operationId: get_resting_heart_rate
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetRestingHeartRateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /blood-pressure:
+    get:
+      summary: Get blood pressure data
+      operationId: get_blood_pressure
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBloodPressureResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /waist-hip-ratio:
+    get:
+      summary: Get waist hip ratio data
+      operationId: get_waist_hip_ratio
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetWaistHipRatioResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /arterial-thickness:
+    get:
+      summary: Get arterial thickness data
+      operationId: get_arterial_thickness
+      tags: ["Biometrics"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetBiometricDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /my-care-team:
+    get:
+      summary: Get patient's care team data
+      operationId: get_my_care_team
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetMyCareTeamResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /test-results:
+    get:
+      summary: Get patient's test results
+      operationId: get_test_results
+      tags: ["Test"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTestResultsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /sendbird-webhook:
+    post:
+      summary: Sendbird Webhook
+      operationId: sendbird_webhook
+      tags: ["Text Messaging"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          description: Webhook recieved
+        '400':
+          description: Bad signature
+  '/test-results-file/{document_id}':
+    get:
+      summary: Get a patient's test results file
+      parameters:
+        - in: path
+          name: document_id
+          schema:
+            type: string
+          required: true
+          description: String ID of the test results file
+      operationId: get_test_results_file
+      tags: ["Test"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTestResultsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /my-products:
+    get:
+      summary: Get my products
+      operationId: get_my_products
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetMyProductsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  '/my-product-file/{document_id}':
+    get:
+      summary: Get my product file
+      parameters:
+        - in: path
+          name: document_id
+          schema:
+            type: string
+          required: true
+          description: String ID of the my product file
+      operationId: get_my_product_file
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetMyProductFileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /my-orders/:
+    get:
+      summary: Get my orders
+      operationId: get_my_orders
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      parameters:
+        - $ref: '#/components/parameters/order_category'
+        - $ref: '#/components/parameters/page_number'
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/days_before'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetMyOrdersResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  '/my-orders-invoice/{order_id}':
+    get:
+      summary: Get order invoice file
+      parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: string
+          required: true
+          description: String ID of the order invoice file
+      operationId: get_order_invoice_file
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          $ref: '#/components/responses/GetOrderInvoiceFileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /approve-order:
+    post:
+      summary: Approve and open order
+      operationId: approve_order
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Approve-Order'
+      responses:
+        '200':
+          description: Order update successful
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /request-order-change:
+    post:
+      summary: Request an order change
+      operationId: request_order_change
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Order-Change'
+      responses:
+        '200':
+          description: Order Change submitted successful
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /auth/get-pending-order-change-request:
+    get:
+      summary: Get details of pending order change request
+      operationId: get_pending_order_change_request
+      tags: ["Order Management"]
+      x-openapi-router-controller: app.api.views
+      parameters:
+        - $ref: '#/components/parameters/sf_orderid'
+      responses:
+        '200':
+          description: Pending Order Change Request retrieved successfully
+        '404':
+          description: No pending Order Change request
+
+  /update-account-state:
+    post:
+      summary: Update Salesforce Account State
+      operationId: update_user_account_state
+      tags: ["Users Management"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Update-Salesforce-Account-State'
+      responses:
+        '200':
+          description: Order update successful
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+
+  /push-notification/register-device/:
+    post:
+      summary: Register device token with push notification service
+      operationId: register_device_token
+      tags: ["Text Messaging"]
+      x-openapi-router-controller: app.api.views
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceNotificationToken'
+      responses:
+        '200':
+          description: Device is registered
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  '/push-notification/unregister-device/{device_token}':
+    delete:
+      summary: Unregister device token from push notification service
+      parameters:
+        - in: path
+          name: device_token
+          schema:
+            type: string
+          required: true
+          description: Device token provided by GCM
+      operationId: unregister_device_token
+      tags: ["Text Messaging"]
+      x-openapi-router-controller: app.api.views
+      responses:
+        '200':
+          description: Device is unregistered
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  parameters:
+    id:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    account:
+      in: query
+      name: account
+      required: true
+      schema:
+        type: string
+    sf_orderid:
+      in: query
+      name: sf_orderid
+      required: true
+      schema:
+        type: string
+    page_number:
+      in: query
+      name: page_number
+      required: true
+      schema:
+        type: number
+    page_size:
+      in: query
+      name: page_size
+      required: false
+      schema:
+        type: number
+    days_before:
+      in: query
+      name: days_before
+      required: false
+      schema:
+        type: number
+    order_category:
+      in: query
+      name: order_category
+      required: true
+      schema:
+        type: string
+        enum:
+          - next
+          - past
+          - on_hold
+    device_token:
+      in: query
+      name: device_token
+      required: true
+      schema:
+        type: string
+  responses:
+    Unauthenticated:
+      description: Unauthenticated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    LoginResponse:
+      description: Login response for successfull login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+    ForgotPasswordResponse:
+      description: Forgot password response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    UpdateUser:
+      description: Update user response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUser'
+    GetUserResponse:
+      description: Get user response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    GetBiometricsResponse:
+      description: Get user response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Biometric'
+    GetBiometricDataResponse:
+      description: User biometric data response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BiometricData'
+    GetTotalBodyFatResponse:
+      description: Patient total body fat response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TotalBodyFat'
+    GetVO2MaxResponse:
+      description: Patient VO2 max response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VO2Max'
+    GetBloodPressureResponse:
+      description: Patient blood pressure response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BloodPressure'
+    GetRestingHeartRateResponse:
+      description: Patient resting heart rate response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestingHeartRate'
+    GetWaistHipRatioResponse:
+      description: Patient waist to hip ratio response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WaistHipRatio'
+    GetMyCareTeamResponse:
+      description: Get patient's care team response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              physician:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  full_name:
+                    type: string
+                  title:
+                    type: string
+                  city:
+                    type: string
+                  state:
+                    type: string
+                  photo:
+                    type: string
+                  user_in_sendbird:
+                    type: boolean
+              health_coach:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  full_name:
+                    type: string
+                  title:
+                    type: string
+                  city:
+                    type: string
+                  state:
+                    type: string
+                  photo:
+                    type: string
+                  user_in_sendbird:
+                    type: boolean
+              service_coordinator:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  full_name:
+                    type: string
+                  title:
+                    type: string
+                  city:
+                    type: string
+                  state:
+                    type: string
+                  photo:
+                    type: string
+                  user_in_sendbird:
+                    type: boolean
+    GetTestResultsResponse:
+      description: Get patient's test results
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Lab Flowchart
+                document_id:
+                  type: string
+                  example: 12345M
+                description:
+                  type: string
+                  example: Blood and urine test results
+                category:
+                  type: string
+                  enum:
+                    - labs
+                    - dexa
+                    - cimt
+                    - spectracell
+                    - truage
+                    - universal
+    GetTestResultsFileResponse:
+      $ref: '#/components/responses/GetTestResultsResponse'
+    GetMyProductsResponse:
+      description: Get my products
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              recurring:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: Melatonin
+                    document_id:
+                      type: string
+                      example: 12345M
+                    package:
+                      type: string
+                      example: 3mg - Bottle of 30 capsules
+                    usage:
+                      type: string
+                      example: Use 1 capsule every night before going to bed
+                    next_refill:
+                      type: string
+                      example: 05/04/2021
+                    last_refill:
+                      type: string
+                      example: 05/04/2021
+                    category:
+                      type: string
+                      enum:
+                        - rx
+                        - vitamins
+                        - lightning
+                        - other
+              extras:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: Melatonin
+                    document_id:
+                      type: string
+                      example: 12345M
+                    package:
+                      type: string
+                      example: 3mg - Bottle of 30 capsules
+                    usage:
+                      type: string
+                      example: Use 1 capsule every night before going to bed
+                    next_refill:
+                      type: string
+                      example: 05/04/2021
+                    last_refill:
+                      type: string
+                      example: 05/04/2021
+                    category:
+                      type: string
+                      enum:
+                        - rx
+                        - vitamins
+                        - lightning
+                        - other
+    GetMyProductFileResponse:
+      description: Get my product file
+      content:
+        application/pdf:
+          schema:
+            type: string
+            format: binary
+    RegisterResponse:
+      description: Register response for successfully created user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+    GetMyOrdersResponse:
+      description: Get my orders
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              orders:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    order_id:
+                      type: string
+                      example: 12345M
+                    order_type:
+                      type: string
+                      enum:
+                        - Prescriptions
+                        - Nutraceuticals
+                    tracking_number:
+                      type: string
+                      example: 'https://tracking.com/example'
+                    order_status:
+                      type: string
+                      example: shipped
+                    shipment_status:
+                      type: string
+                      example: shipped
+                    products:
+                      type: array
+                      items:
+                        type: string
+                    order_details:
+                      type: object
+                      properties:
+                        address:
+                          $ref: '#/components/schemas/OrderAddress'
+                        patient_name:
+                          type: string
+                          example: Some name
+                        order_date:
+                          type: string
+                          example: 05/04/2021
+                        physician_name:
+                          type: string
+                          example: Some name
+              total:
+                type: number
+                example: '20'
+    GetOrderInvoiceFileResponse:
+      description: Get patient's test results file
+      content:
+        application/pdf:
+          schema:
+            type: string
+            format: binary
+  schemas:
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
+    Login:
+      type: object
+      properties:
+        # username:
+        #   type: string
+        email:
+          type: string
+        password:
+          type: string
+          format: password
+      required:
+        - email
+        - password
+    Registration:
+      type: object
+      properties:
+        email:
+          type: string
+        given_name:
+          type: string
+        family_name:
+          type: string
+        sf_userid:
+          type: string
+      required:
+        - email
+        - given_name
+        - family_name
+        - sf_userid
+    Approve-Order:
+      type: object
+      properties:
+        sf_orderid:
+          type: string
+      required:
+        - sf_orderid
+    Request-Order-Change:
+      type: object
+      properties:
+        sf_orderid:
+          type: string
+        order_change_type:
+          type: string
+        request_content:
+          type: string
+      required:
+        - sf_orderid
+        - order_change_type
+        - request_content
+    Update-Salesforce-Account-State:
+      type: object
+      properties:
+        sf_userid:
+          type: string
+      required:
+        - sf_userid
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Email:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    ChangePassword:
+      type: object
+      properties:
+        password:
+          type: string
+          format: password
+        confirm_password:
+          type: string
+          format: password
+      required:
+        - password
+        - confirm_password
+    UpdateUser:
+      type: object
+      properties:
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+    User:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        age:
+          type: number
+        gender:
+          type: string
+        username:
+          type: string
+        profile_picture:
+          type: string
+        access_token:
+          type: string
+        physician:
+          type: string
+        health_coach:
+          type: string
+        service_coordinator:
+          type: string
+      required:
+        - first_name
+        - last_name
+        - email
+        - phone
+        - username
+        - profile_picture
+    Biometric:
+      type: object
+      properties:
+        weight:
+          type: number
+        height:
+          type: number
+        total_body_fat:
+          type: number
+        total_body_fat_indicator:
+          type: string
+          enum:
+            - green
+            - yellow
+        muscle_mass:
+          type: number
+        fat_mass:
+          type: number
+        upper_torso_fat:
+          type: number
+        vo2_max:
+          type: number
+        vo2_max_indicator:
+          type: string
+          enum:
+            - green
+            - yellow
+        peak_heart_rate:
+          type: number
+        anaerobic_threshold:
+          type: number
+        max_wattage:
+          type: number
+        resting_heart_rate:
+          type: number
+        resting_heart_rate_indicator:
+          type: string
+          enum:
+            - green
+            - yellow
+        blood_pressure_systolic:
+          type: number
+        blood_pressure_diastolic:
+          type: number
+        blood_pressure_indicator:
+          type: string
+          enum:
+            - green
+            - yellow
+        arterial_thickness:
+          type: number
+        waist_hip_ratio:
+          type: number
+        waist_hip_ratio_indicator:
+          type: string
+          enum:
+            - green
+            - yellow
+    BiometricData:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              value:
+                type: number
+    TotalBodyFat:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BiometricData'
+        - properties:
+            referential_values:
+              type: object
+              properties:
+                general:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      classification:
+                        type: string
+                        enum:
+                          - Lean
+                          - Optimal
+                          - Average
+                          - Moderately Overweight
+                          - Overweight
+                      value:
+                        type: string
+                        example: 18-22
+                athlete:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      classification:
+                        type: string
+                        enum:
+                          - Lean
+                          - Optimal
+                          - Average
+                          - Moderately Overweight
+                          - Overweight
+                      value:
+                        type: string
+                        example: 7-15
+    VO2Max:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BiometricData'
+        - properties:
+            referential_values:
+              type: array
+              items:
+                type: object
+                properties:
+                  rating:
+                    type: string
+                    enum:
+                      - Excellent
+                      - Good
+                      - Average
+                      - Fair
+                      - Poor
+                  value:
+                    type: string
+                    example: 18-22
+            age_group:
+              type: string
+              enum:
+                - 20-29
+                - 30-39
+                - 40-49
+                - 50-59
+                - 60+
+    BloodPressure:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              systolic:
+                type: number
+              diastolic:
+                type: number
+        referential_values:
+          type: array
+          items:
+            type: object
+            properties:
+              rating:
+                type: string
+                enum:
+                  - Normal
+                  - Pre-Hypertension
+                  - Stage 1 Hypertension
+                  - Stage 2 Hypertension
+              systolic:
+                type: string
+                example: 140-159
+              diastolic:
+                type: string
+                example: 90-99
+    RestingHeartRate:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BiometricData'
+        - properties:
+            referential_values:
+              type: array
+              items:
+                type: object
+                properties:
+                  rating:
+                    type: string
+                    enum:
+                      - Excellent
+                      - Good
+                      - Average
+                      - Fair
+                      - Poor
+                  score:
+                    type: string
+                    example: 18-22
+    WaistHipRatio:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BiometricData'
+        - properties:
+            referential_values:
+              type: array
+              items:
+                type: object
+                properties:
+                  risk:
+                    type: string
+                    enum:
+                      - Low
+                      - Moderate
+                      - High
+                      - Very High
+                  value:
+                    type: string
+                    example: 18-22
+            age_group:
+              type: string
+              enum:
+                - 20-29
+                - 30-39
+                - 40-49
+                - 50-59
+                - 60-69
+    OrderAddress:
+      type: object
+      properties:
+        ups_att:
+          type: string
+          example: Attn.
+        shipping_street:
+          type: string
+          example: Street rd.
+        city:
+          type: string
+          example: New York
+        postal_code:
+          type: string
+          example: 2992W
+        country:
+          type: string
+          example: United States
+    DeviceNotificationToken:
+      type: object
+      properties:
+        device_token:
+          type: string
+      required:
+        - device_token
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: app.security.decode_token

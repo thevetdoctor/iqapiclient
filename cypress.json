@@ -1,0 +1,5 @@
+// __cypress.json__
+// cypress.json  
+{
+    "pluginsFile": "src/__tests__/e2e/plugins/index.js"
+  }

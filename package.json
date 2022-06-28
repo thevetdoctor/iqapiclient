@@ -16,7 +16,10 @@
     "react-flip-move": "^3.0.4",
     "react-icons": "^4.4.0",
     "react-loader-spinner": "^5.1.5",
+    "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^9.0.4",
+    "restful-react": "^15.9.4",
     "typescript": "^4.7.4",
     "web-vitals": "^2.1.4"
   },
@@ -24,7 +27,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "cy:run": "cypress run",
+    "cypress:open": "cypress open",
+    "restful:up": "restful-react import --file postman.yml --output postman.tsx"
   },
   "eslintConfig": {
     "extends": [
@@ -45,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "autoprefixer": "^10.4.7",
     "postcss": "^8.4.14",
     "tailwindcss": "^3.1.4"
