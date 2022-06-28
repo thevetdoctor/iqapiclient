@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "3db29e64-09bc-45e6-a59c-e6b4d27deff7",
+		"name": "IQ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/v1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TEST with subs\",\n    \"subcategories\": [\"test\", \"test\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/v1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/v1/TEST%20without%20subs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1",
+								"TEST%20without%20subs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_category_name\": \"TEST with subs\",\n    \"new_category_name\": \"TEST subs\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/v1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subcategories",
+			"item": [
+				{
+					"name": "add subcategories",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TEST subs\",\n    \"subcategories\": [\n        \"test\",\n        \"test1\",\n        \"akin\",\n        \"akin\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/v1/subcategories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1",
+								"subcategories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update subacategories",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Languages\",\n    \"old_subcategory_name\": \"python\",\n    \"new_subcategory_name\": \"python3\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/v1/subcategories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1",
+								"subcategories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete_subcategory",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/v1/Test/Docker?keep_questions=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"v1",
+								"Test",
+								"Docker"
+							],
+							"query": [
+								{
+									"key": "keep_questions",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

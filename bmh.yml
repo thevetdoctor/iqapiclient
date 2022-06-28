@@ -1,0 +1,291 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/thevetdoctor/BuildMyHouse/1.0.0
+  - description: OpenAPI 3.0 API Documentation
+    url: https://us-central1-build-myhouse.cloudfunctions.net/bmhAPi/
+  - url: http://localhost:5001/build-myhouse/us-central1/bmhAPi/
+    description: test graphql server
+info:
+  description: GraphQL API Schema for the BuildMyHouse Application
+  version: "1.0.0"
+  title: BuildMyHouse API
+  contact:
+    email: thevetdoctor@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: admin
+    description:  admin-only access
+  - name: users
+    description: access to all registered users
+  - name: general
+    description: access to all (unregistered & registered)
+paths:
+  /graphql:
+    post:
+      tags:
+        - general
+      summary: graphQL endpoint
+      operationId: accesses the graphQL server
+      description: graphQL Endpoint
+      parameters:
+        - in: header
+          name: token
+          description: admin access token
+          required: false
+          schema:
+            type: string
+        # - $ref: '#/components/parameters/Customers'
+        - $ref: '#/components/parameters/Products'
+        # - $ref: '#/components/parameters/Orders'
+      responses:
+        '200':
+          description: default status for a successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Vaidation error or Resource already exist
+        '403':
+          description: Access forbidden
+        '404':
+          description: Not found or Required field missing
+        '503':
+          description: Service unavailable    
+          
+  
+components:
+  parameters:
+    # Customers:
+    #   name: query
+    #   in: query
+    #   description: query parameter for customers/users
+    #   schema:
+    #     type: string
+    #   example: '{customers{id, firstName}}'
+    Products:
+      name: query
+      in: query
+      description: query parameter for products
+      schema:
+        type: string
+      example: '{products{id, name, description, status, price, likes, userId, imageCollection{id, url}}}'
+    # Orders:
+    #   name: query
+    #   in: query
+    #   description: query parameter for orders
+    #   schema:
+    #     type: string
+    #   example: '{orders(userId: 2) {id, totalValue, orderproducts {id, name, price, imageCollection {id, url}}}}'
+        
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - mobile
+        - uid
+        - address
+        - status
+        - birthday
+        - profileImage
+        - products
+      properties:
+        id:
+          type: string
+          format: number
+          example: 1
+        firstName:
+          type: string
+          example: oba
+        lastName:
+          type: string
+          example: bmh
+        email:
+          type: string
+          example: oba@bmh.com
+        mobile:
+          type: string
+          example: 2348012345678
+        uid:
+          type: string
+          format: password
+          example: hidden
+        address:
+          type: string
+          example: Ibadan
+        status:
+          type: string
+          example: software engineer
+        birthday:
+          type: string
+          format: date
+          example: 2021-01-24 
+        profileImage:
+          type: string
+          example: https://res.cloudinary.com/oba.png
+        products:
+            type: array
+            items:
+              $ref: '#/components/schemas/Product'
+        orders:
+            type: array
+            items:
+              $ref: '#/components/schemas/Order'
+        posts:
+            type: array
+            items:
+              $ref: '#/components/schemas/Post'
+      description: User Schema
+      
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - status
+        - userId
+        - price
+        - likes
+        - imageCollection
+      properties:
+        id:
+          type: string
+          format: number
+          example: 1
+        name:
+          type: string
+          example: mattress
+        description:
+          type: string
+          example: beddings
+        status:
+          type: string
+          example: all products
+        userId:
+          type: string
+          format: number
+          example: 2
+        price:
+          type: string
+          format: number
+          example: #25000
+        likes:
+          type: string
+          format: number
+          example: 3
+        imageCollection:
+            type: array
+            items:
+              $ref: '#/components/schemas/Image'
+      description: Product Schema
+      
+    Image:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - status
+        - productId
+        - url
+        - likes
+      properties:
+        id:
+          type: string
+          format: number
+          example: 1
+        name:
+          type: string
+          example: 6 X 6 mattress
+        description:
+          type: string
+          example: beddings
+        status:
+          type: string
+          example: basic
+        productId:
+          type: string
+          format: number
+          example: 1
+        url:
+          type: string
+          example: https://res.cloudinary.com/mattress.png
+        likes:
+          type: string
+          format: number
+          example: 3
+      description: Image Schema
+ 
+    Post:
+      type: object
+      required:
+        - id
+        - title
+        - message
+        - status
+        - userId
+        - likes
+      properties:
+        id:
+          type: string
+          format: number
+          example: 1
+        title:
+          type: string
+          example: excellent service
+        message:
+          type: string
+          example: the architectural service of BMH is awesome
+        status:
+          type: string
+          example: comment
+        userId:
+          type: string
+          format: number
+          example: 32
+        likes:
+          type: string
+          format: number
+          example: 12
+      description: Post Schema
+ 
+    Order:
+      type: object
+      required:
+        - id
+        - userId
+        - totalValue
+        - status
+        - orderproducts
+      properties:
+        id:
+          type: string
+          format: number
+          example: 1
+        userId:
+          type: string
+          format: number
+          example: 32
+        totalValue:
+          type: string
+          format: number
+          example: #235000
+        status:
+          type: string
+          example: active
+        orderproducts:
+            type: array
+            items:
+              $ref: '#/components/schemas/Product'
+      description: Order Schema
